@@ -5,19 +5,6 @@ const app = express();
 //middleware
 app.use(express.json());
 
-////////////////////////////////////////
-// simple routing
-// app.get('/', (req, res) => {
-//   res
-//     .status(200)
-//     .json({ message: 'Hello from the server side!', app: 'Natours' });
-// });
-
-// app.post('/', (req, res) => {
-//   res.send('You can post to this endpoint...');
-// });
-/////////////////////////////////////////
-
 //////////////////////
 // Read tours file
 const tours = JSON.parse(
@@ -25,17 +12,17 @@ const tours = JSON.parse(
 );
 
 //get all tours
-app.get('/api/v1/tours', (req, res) => {
+const getAllTours = (req, res) => {
   res.status(200).json({
     status: 'success',
     results: tours.length,
     data: { ...tours },
   });
-});
+};
 
 ///////////////////////
 //get single tour
-app.get('/api/v1/tours/:id', (req, res) => {
+const getSingleTour = (req, res) => {
   console.log(req.params);
   const id = req.params.id;
   const tour = tours.find((tour) => tour.id === +id);
@@ -51,11 +38,37 @@ app.get('/api/v1/tours/:id', (req, res) => {
       message: 'not-found',
     });
   }
-});
+};
+
+///////////////////////
+//delete tour
+const deleteTour = (req, res) => {
+  const index = tours.findIndex((el) => el.id === +req.params.id);
+
+  if (index === -1) {
+    return res.status(404).json({
+      status: 'fail',
+      message: 'Invalid ID',
+    });
+  }
+
+  tours.splice(index, 1);
+  fs.writeFile(
+    `${__dirname}/dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    (err) => {
+      if (err) console.error(err.message);
+      res.status(204).send({
+        status: 'success',
+        data: null,
+      });
+    },
+  );
+};
 
 ///////////////////////
 //post new tour
-app.post('/api/v1/tours', (req, res) => {
+const createTour = (req, res) => {
   // console.log(req.body);
 
   const newID = tours[tours.length - 1].id + 1;
@@ -78,11 +91,10 @@ app.post('/api/v1/tours', (req, res) => {
       });
     },
   );
-});
-
+};
 ///////////////////////
 //patch tour
-app.patch('/api/v1/tours/:id', (req, res) => {
+const updateTour = (req, res) => {
   const tourId = req.params.id;
   const tour = tours.find((tour) => tour.id === +tourId);
 
@@ -108,33 +120,26 @@ app.patch('/api/v1/tours/:id', (req, res) => {
       },
     );
   }
-});
+};
+/////////////////////////////////////////////
+/////////////////////////////////////////////
+// app.get('/api/v1/tours', getAllTours);
+// app.get('/api/v1/tours/:id', getSingleTour);
+// app.post('/api/v1/tours', createTour);
+// app.patch('/api/v1/tours/:id', updateTour);
+// app.delete('/api/v1/tours/:id', deleteTour);
 
-///////////////////////
-//delete tour
-app.delete('/api/v1/tours/:id', (req, res) => {
-  const index = tours.findIndex((el) => el.id === +req.params.id);
+// get all tours and add new tour
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+// get single tour , delete , patch tour
+app
+  .route('/api/v1/tours/:id')
+  .get(getSingleTour)
+  .patch(updateTour)
+  .delete(deleteTour);
+/////////////////////////////////////////////
+/////////////////////////////////////////////
 
-  if (index === -1) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
-
-  tours.splice(index, 1);
-  fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
-    JSON.stringify(tours),
-    (err) => {
-      if (err) console.error(err.message);
-      res.status(204).send({
-        status: 'success',
-        data: null,
-      });
-    },
-  );
-});
 ///////////////////////////////////////////
 // server
 ///////////////////////////////////////////
