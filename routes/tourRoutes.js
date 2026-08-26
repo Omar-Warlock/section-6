@@ -6,8 +6,10 @@ const {
   updateTour,
   deleteTour,
 } = require('../controllers/tourController');
-const router = express.Router();
+const { checkID } = require('../middlewares/middlware');
 
+const router = express.Router();
+router.param('id', checkID);
 router.route('/').get(getAllTours).post(createTour);
 // get single tour , delete , patch tour
 router.route('/:id').get(getSingleTour).patch(updateTour).delete(deleteTour);

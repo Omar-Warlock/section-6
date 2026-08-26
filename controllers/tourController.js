@@ -16,38 +16,21 @@ exports.getAllTours = (req, res) => {
 ///////////////////////
 //get single tour
 exports.getSingleTour = (req, res) => {
-  console.log(req.params);
   const id = req.params.id;
   const tour = tours.find((tour) => tour.id === +id);
-  console.log(tour);
-  if (tour) {
-    res.status(200).json({
-      status: 'success',
-      data: { ...tour },
-    });
-  } else {
-    res.status(404).json({
-      status: 'failed',
-      message: 'not-found',
-    });
-  }
+  res.status(200).json({
+    status: 'success',
+    data: { ...tour },
+  });
 };
 
 ///////////////////////
 //delete tour
 exports.deleteTour = (req, res) => {
   const index = tours.findIndex((el) => el.id === +req.params.id);
-
-  if (index === -1) {
-    return res.status(404).json({
-      status: 'fail',
-      message: 'Invalid ID',
-    });
-  }
-
   tours.splice(index, 1);
   fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
+    `${__dirname}/../dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     (err) => {
       if (err) console.error(err.message);
@@ -73,7 +56,7 @@ exports.createTour = (req, res) => {
   tours.push(newTour);
 
   fs.writeFile(
-    `${__dirname}/dev-data/data/tours-simple.json`,
+    `${__dirname}/../dev-data/data/tours-simple.json`,
     JSON.stringify(tours),
     (err) => {
       res.status(201).json({
@@ -91,28 +74,21 @@ exports.updateTour = (req, res) => {
   const tourId = req.params.id;
   const tour = tours.find((tour) => tour.id === +tourId);
 
-  if (!tour) {
-    res.status(404).json({
-      status: 'fail',
-      message: 'not found',
-    });
-  } else {
-    const updatedTour = { ...tour, ...req.body };
-    const index = tours.findIndex((tour) => tour.id === +tourId);
-    tours[index] = { ...updatedTour };
-    fs.writeFile(
-      `${__dirname}/dev-data/data/tours-simple.json`,
-      JSON.stringify(tours),
-      (err) => {
-        res.status(200).json({
-          status: 'success',
-          data: {
-            tour: { ...updatedTour },
-          },
-        });
-      },
-    );
-  }
+  const updatedTour = { ...tour, ...req.body };
+  const index = tours.findIndex((tour) => tour.id === +tourId);
+  tours[index] = { ...updatedTour };
+  fs.writeFile(
+    `${__dirname}/../dev-data/data/tours-simple.json`,
+    JSON.stringify(tours),
+    (err) => {
+      res.status(200).json({
+        status: 'success',
+        data: {
+          tour: { ...updatedTour },
+        },
+      });
+    },
+  );
 };
 
 //
