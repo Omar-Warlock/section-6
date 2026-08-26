@@ -45,8 +45,6 @@ exports.deleteTour = (req, res) => {
 ///////////////////////
 //post new tour
 exports.createTour = (req, res) => {
-  // console.log(req.body);
-
   const newID = tours[tours.length - 1].id + 1;
   const newTour = {
     id: newID,
